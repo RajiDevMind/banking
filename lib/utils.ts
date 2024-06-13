@@ -212,3 +212,19 @@ export const authFormSchema = (type: string) =>
     email: z.string().email(),
     password: z.string().min(8),
   });
+
+export const authFormSchema_t = (type: string) =>
+  z.object({
+    firstName: type === "sign-in" ? z.string().optional() : z.string().min(4),
+    lastName: type === "sign-in" ? z.string().optional() : z.string().min(4),
+    address: type === "sign-in" ? z.string().optional() : z.string().max(50),
+    state:
+      type === "sign-in" ? z.string().optional() : z.string().min(2).max(20),
+    postalCode:
+      type === "sign-in" ? z.string().optional() : z.string().min(3).max(6),
+    DOB: type === "sign-in" ? z.string().optional() : z.string().min(4),
+    ssn: type === "sign-in" ? z.string().optional() : z.string().min(4),
+    // Sign in details
+    email: z.string().email(),
+    password: z.string().min(4),
+  });
