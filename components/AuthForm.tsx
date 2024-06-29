@@ -11,10 +11,14 @@ import { Form } from "@/components/ui/form";
 import CustomInput from "./CustomInput";
 import { authFormSchema_t } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn, signUp } from "@/lib/actions/user.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const formSchema = authFormSchema_t(type);
   // 1. Define your form.
@@ -27,14 +31,34 @@ const AuthForm = ({ type }: { type: string }) => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values);
+    // Do something with the form data.
+    // ✅ This will be type-safe and validated.
+
+    try {
+      // Sign-up with appwrite and create plaid token
+
+      if (type === "sign-up") {
+        const newUser = await signUp(data);
+        setUser(newUser);
+      }
+      if (type === "sign-in") {
+        const response = await signIn({
+          email: data.email,
+          password: data.password,
+        });
+        if (response) router.push("/");
+        navigator.vibrate([200, 100, 200]);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
     //
     setIsLoading(false);
-  }
+  };
 
   return (
     <section className="auth-form">
@@ -56,7 +80,7 @@ const AuthForm = ({ type }: { type: string }) => {
           </h1>
           <p className="text-16 font-normal text-grey-600">
             {user
-              ? "Link your account to get start"
+              ? "Link your account to get started"
               : "Please enter your details"}
           </p>
         </div>
@@ -88,6 +112,12 @@ const AuthForm = ({ type }: { type: string }) => {
                     name="address"
                     label="Address"
                     placeholder="suite 11 brooklyn..."
+                  />
+                  <CustomInput
+                    control={form.control}
+                    name="city"
+                    label="City"
+                    placeholder="Enter your city?"
                   />
 
                   <div className="flex gap-4">
